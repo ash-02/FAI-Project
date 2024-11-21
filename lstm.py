@@ -10,6 +10,18 @@ from tensorflow.keras.preprocessing.sequence import pad_sequences
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Input, LSTM, Embedding, Dense
 
+import contractions
+import re
+
+import nltk
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
+
+nltk.download('punkt_tab')
+nltk.download('stopwords')
+
+
+
 class lstm:
     def __init__(self) -> None:
         self.data = None
@@ -18,6 +30,20 @@ class lstm:
 
         self.max_summary_len = 100
         self.max_transcript_len = 500
+        self.stop_words = set(stopwords.words('english'))
+
+    def preprocess_text(self,text):
+        text = contractions.fix(text)
+        text = text.lower()
+        text = re.sub(r"[^a-zA-Z0-9\s]", "", text)
+
+        tokens = word_tokenize(text)
+
+        # Remove very short and very long words
+        tokens = [t for t in tokens if t not in self.stop_words]
+        tokens = [t for t in tokens if 2 <= len(t) <= 20]
+
+        return ' '.join(tokens)
 
     def read_preprocess_data(self):
         # Read data
@@ -26,6 +52,10 @@ class lstm:
 
         # Preprocess
         self.data = self.data.dropna(subset=['transcript', 'description'])
+        self.data = self.data.dropna(subset=['transcript', 'description'])
+
+        self.data['transcript'] = self.data['transcript'].astype(str).apply(self.preprocess_text)
+        self.data['description'] = self.data['description'].astype(str).apply(self.preprocess_text)
 
     def train(self):
         self.read_preprocess_data()
