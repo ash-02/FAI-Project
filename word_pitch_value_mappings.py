@@ -1,5 +1,4 @@
 import pandas as pd
-import json
 
 def map_pitch_to_words(pitch_data, transcript_data):
     """
@@ -7,7 +6,7 @@ def map_pitch_to_words(pitch_data, transcript_data):
     Includes the ground true label (1/0) our group manually labeled for each word's importance in the output.
     Returns a dictionary where keys are words and values are dictionaries with pitch values and label.
     """
-    result = {}
+    result = []
 
     grouped_pitch = pitch_data.groupby("File Name")
     grouped_transcript = transcript_data.groupby("File Name")
@@ -41,25 +40,26 @@ def map_pitch_to_words(pitch_data, transcript_data):
             word_pitches.extend([0] * (5 - len(word_pitches)))
 
 
-            result[word] = {
+            result.append({
+                "word": word,
                 "pitches": word_pitches,
                 "label": label
-            }
+            })
 
     return result
 
 def save_results(results, output_file):
     """
-    Saves the results dictionary as a JSON file.
+    Saves the results dictionary as a CSV file.
     """
-    with open(output_file, 'w') as f:
-        json.dump(results, f, indent=4)
+    results_df = pd.DataFrame(results)
+    results_df.to_csv(output_file, index=False)
 
 if __name__ == "__main__":
 
     pitch_file_path = "data/grouped_pitch_vectors.csv"
     transcript_file_path = "data/timestamps_for_words.csv"
-    output_file = "data/word_pitch_mappings.json"
+    output_file = "data/word_pitch_mappings.csv"
 
     pitch_data = pd.read_csv(pitch_file_path)
     transcript_data = pd.read_csv(transcript_file_path)
