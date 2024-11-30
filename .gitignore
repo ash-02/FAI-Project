@@ -5,3 +5,4 @@ testAudioConverted/
 model/CNN_model.h5
 model/adaboost_classifier.pkl
 .DS_Store
+draftAudios/output.wav
