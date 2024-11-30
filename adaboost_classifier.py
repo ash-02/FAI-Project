@@ -4,6 +4,7 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, accuracy_score
 import ast
+import joblib
 
 # Load the dataset
 csv_file_path = 'data/word_pitch_mappings.csv'
@@ -35,9 +36,11 @@ adaboost_clf = AdaBoostClassifier(estimator=base_estimator, n_estimators=50, lea
 # Train the classifier
 adaboost_clf.fit(X_train, y_train)
 
+joblib.dump(adaboost_clf, 'model/adaboost_classifier.pkl')
+
 # Make predictions
 y_pred = adaboost_clf.predict(X_test)
 
 # Evaluate the model
-print("Accuracy:", accuracy_score(y_test, y_pred))
-print("\nClassification Report:\n", classification_report(y_test, y_pred))
+# print("Accuracy:", accuracy_score(y_test, y_pred))
+# print("\nClassification Report:\n", classification_report(y_test, y_pred))
