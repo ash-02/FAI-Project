@@ -11,6 +11,27 @@ window_size = 8000
 step_size = 4000
 sr = 8000
 
+def preprocess_audio(audio_path, sr=8000):
+    if audio_path.lower().endswith('.wav'):
+        return audio_path
+    
+    if audio_path is None:
+        raise ValueError("audio_path cannot be None.")
+    
+    base_name = os.path.basename(audio_path)
+    output_file_name = os.path.splitext(base_name)[0] + '.wav'
+    output_file_path = "./testAudioConverted/" + output_file_name
+    
+    try:
+        audio = pydub.AudioSegment.from_file(audio_path)
+        audio.export(output_file_path, format="wav")
+        print(f"Conversion successful! WAV file saved at: {output_file_path}")
+        return output_file_path
+    except Exception as e:
+        print(f"Error during conversion: {e}")
+        return None
+        
+
 def process_wav_file_for_prediction(wav_path, window_size, step_size, target_sr=8000):
     with wave.open(wav_path, 'rb') as wav_file:
         sample_rate = wav_file.getframerate()
@@ -18,6 +39,11 @@ def process_wav_file_for_prediction(wav_path, window_size, step_size, target_sr=
 
         audio_data = wav_file.readframes(num_frames)
         audio_data = np.frombuffer(audio_data, dtype=np.int16)
+
+        if sample_rate != target_sr:
+            num_target_samples = int(len(audio_data) * target_sr / sample_rate)
+            audio_data = resample(audio_data, num_target_samples)
+            sample_rate = target_sr
 
     audio_segments = []
     num_windows = (len(audio_data) - window_size) // step_size + 1
@@ -35,6 +61,27 @@ def process_wav_file_for_prediction(wav_path, window_size, step_size, target_sr=
 
 song_wav_path = 'cleaned_webm/audio1.webm'
 
+song_wav_path = preprocess_audio(song_wav_path)
+
 song_audio_segments = process_wav_file_for_prediction(song_wav_path, window_size, step_size)
 
 predicted_song_pitches = model.predict(song_audio_segments)
+
+step_duration = step_size / sr
+timestamps = np.arange(0, len(predicted_song_pitches) * step_duration, step_duration)[:len(predicted_song_pitches)]
+pitch_time_dict = {float(timestamps[i]): float(predicted_song_pitches[i]) for i in range(len(timestamps))}
+
+print("Pitch values with time in dictionary format:")
+print(pitch_time_dict)
+
+with open("pitch_values.txt", "w") as file:
+    for timestamp, pitch in pitch_time_dict.items():
+        file.write(f"[{timestamp:.2f}s] {pitch}\n")
+
+plt.figure(figsize=(14, 6))
+plt.plot(timestamps, predicted_song_pitches, label='Predicted Pitch', linestyle='dashed')
+plt.title('Predicted Pitch Values Over Time for the Uploaded Song')
+plt.xlabel('Time (seconds)')
+plt.ylabel('Pitch (MIDI Number)')
+plt.legend()
+plt.show()
