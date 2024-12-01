@@ -63,12 +63,10 @@
     if (data.error) {
         alert(data.error);
     } else {
-        // Correctly process the array of objects
         const importantWords = data.adaboost_result.map(item => {
             return `Word: ${item.word}, Label: ${item.label}`;
         }).join('\n');
 
-        // Display the result in the textarea
         document.getElementById('important-words').textContent = importantWords;
     }
 });
