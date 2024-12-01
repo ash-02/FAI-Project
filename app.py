@@ -61,15 +61,18 @@ def analyze():
 
         word_pitch_df = abc.map_pitch_to_words(pitch_df, transcript_df)
 
-        adaboost_result = abc.use_adaboost(word_pitch_df)
+        key_words, non_key_words = abc.use_adaboost(word_pitch_df)
 
         os.remove(temp_path)
         if os.path.exists(audio_file_wav):
             os.remove(audio_file_wav)
 
-        return jsonify({
-            "adaboost_result": adaboost_result.to_dict(orient="records")
-        })
+        result = {
+            "key_words": key_words,
+            "non_key_words": non_key_words
+        }
+
+        return jsonify(result)
 
     except Exception as e:
         return f"Error processing audio: {e}", 500

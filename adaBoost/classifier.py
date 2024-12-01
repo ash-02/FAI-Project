@@ -34,8 +34,6 @@ import joblib
 #       results_df = pd.DataFrame(result)
 #       return results_df
 
-import pandas as pd
-
 def map_pitch_to_words(pitch_data, transcript_data):
     """
     Maps pitches to words in a transcript with a fixed window of 5 pitches per word.
@@ -92,7 +90,8 @@ def use_adaboost(word_pitch_mappings):
     Input:
     word_pitch_mappings : Dataframe with columns "word", "pitches"
     Output:
-    result : Dataframe with columns "word", "label"
+    key_words : list of key words in a sentence
+    non_key_words : list of non-key words in a sentence
     """
 
     adaboost_clf = joblib.load('model/adaboost_classifier.pkl')
@@ -103,4 +102,7 @@ def use_adaboost(word_pitch_mappings):
     X = pd.DataFrame(word_pitch_mappings['pitches'].tolist(), columns=[f'Pitch_{i+1}' for i in range(5)])
     result['label'] = adaboost_clf.predict(X)
 
-    return result
+    key_words = result[result["label"] == 1]["word"].tolist()
+    non_key_words = result[result["label"] == 0]["word"].tolist()
+
+    return key_words, non_key_words
