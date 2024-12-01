@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Transcript and Analysis</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        textarea {
+            width: 100%;
+            height: 150px;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Audio Transcript and Analysis</h1>
+
+    <form id="upload-form" enctype="multipart/form-data">
+        <label for="audio">Upload Audio File:</label>
+        <input type="file" id="audio" name="audio" accept=".wav, .mp3, .webm" required>
+        <br><br>
+        <button type="button" id="transcribe-button">Get Transcript</button>
+        <button type="button" id="analyze-button">Analyze Important Words</button>
+    </form>
+
+    <h2>Transcript:</h2>
+    <textarea id="transcript" readonly></textarea>
+
+    <h2>Important Words:</h2>
+    <textarea id="important-words" readonly></textarea>
+
+    <script>
+        document.getElementById('transcribe-button').addEventListener('click', async () => {
+            const formData = new FormData(document.getElementById('upload-form'));
+            const response = await fetch('/transcribe', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+            if (data.error) {
+                alert(data.error);
+            } else {
+                document.getElementById('transcript').textContent = data.transcript;
+            }
+        });
+
+        document.getElementById('analyze-button').addEventListener('click', async () => {
+    const formData = new FormData(document.getElementById('upload-form'));
+    const response = await fetch('/analyze', {
+        method: 'POST',
+        body: formData
+    });
+    const data = await response.json();
+    if (data.error) {
+        alert(data.error);
+    } else {
+        // Correctly process the array of objects
+        const importantWords = data.adaboost_result.map(item => {
+            return `Word: ${item.word}, Label: ${item.label}`;
+        }).join('\n');
+
+        // Display the result in the textarea
+        document.getElementById('important-words').textContent = importantWords;
+    }
+});
+    </script>
+</body>
+</html>
