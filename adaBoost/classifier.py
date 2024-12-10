@@ -57,29 +57,23 @@ def map_pitch_to_words(pitch_data, transcript_data):
         word_pitches = []
         current_time = start_time
 
-        # Collect pitches within the word's time range
         while current_time < end_time:
-            # Find the nearest pitch within a tolerance of 0.25 seconds
             nearest_pitch = next(
-                (p for t, p in zip(pitch_times, pitch_values) if abs(t - current_time) < 0.25), 0  # Default value if no pitch is found
+                (p for t, p in zip(pitch_times, pitch_values) if abs(t - current_time) < 0.25), 0
             )
             word_pitches.append(nearest_pitch)
             current_time += 0.5
 
-            # Stop collecting once we have 5 pitches
             if len(word_pitches) == 5:
                 break
         
-        # Pad with zeros if fewer than 5 pitches are found
         word_pitches.extend([0] * (5 - len(word_pitches)))
 
-        # Append to the result
         result.append({
             "word": word,
             "pitches": word_pitches,
         })
 
-    # Convert result to DataFrame
     results_df = pd.DataFrame(result)
     return results_df
 
