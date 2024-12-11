@@ -1,7 +1,6 @@
 import os
 import librosa
 import numpy as np
-import tensorflow as tf
 from keras import layers, models
 import matplotlib.pyplot as plt
 
@@ -40,16 +39,12 @@ def process_file(wav_path, pv_path, sr, frame_size=256):
             if start_frame < num_frames and end_frame <= num_frames:
                 segment_pv = pitch_data[start_frame:end_frame]
 
-                # print(f"Start frame: {start_frame}, End frame: {end_frame}, Segment PV: {segment_pv}")
-
                 if len(segment_pv) > 0 and max(segment_pv) > 0:
                     label = max(segment_pv)
                     labels.append(label)
                 else:
                     print(f"Warning: Empty or zero segment_pv for start_frame {start_frame} and end_frame {end_frame}")
                     audio_segments.pop()
-
-    # print(f"Processed {len(audio_segments)} segments and {len(labels)} labels for {wav_path}")
 
     return np.array(audio_segments), np.array(labels)
 
