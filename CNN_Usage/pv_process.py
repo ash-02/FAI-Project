@@ -1,7 +1,6 @@
 import os
 import numpy as np
 import tensorflow as tf
-import matplotlib.pyplot as plt
 import wave
 import pydub
 from scipy.signal import resample
@@ -61,12 +60,8 @@ def process_wav_file_for_prediction(wav_path, window_size, step_size, target_sr=
     return audio_segments
 
 def extract_pitch_vector(audio_file):
-    
-    # song_wav_path = 'cleaned_webm/audio1.webm'
 
     song_wav_path = audio_file
-
-    # song_wav_path = preprocess_audio(song_wav_path)
 
     song_audio_segments = process_wav_file_for_prediction(song_wav_path, window_size, step_size)
 
